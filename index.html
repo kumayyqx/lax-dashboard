@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#1a1a1a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Lacrosse Board">
+  <meta name="description" content="Interactive lacrosse coaching whiteboard">
+  <title>🥍 Lacrosse Whiteboard</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header id="header">
+    <div class="header-left">
+      <span class="logo">🥍 <span class="logo-text">LACROSSE</span></span>
+    </div>
+
+    <div class="header-center" id="header-tools">
+      <!-- Court toggle -->
+      <div class="tgrp" title="Court size">
+        <button id="btn-half" class="active" onclick="App.setCourt('half')">Half</button>
+        <button id="btn-full" onclick="App.setCourt('full')">Full</button>
+      </div>
+      <div class="hsep"></div>
+      <!-- Draw tools -->
+      <button class="btn" id="btn-draw" onclick="App.setTool('draw')" title="Draw (D)">✏️</button>
+      <button class="btn" id="btn-arrow" onclick="App.setTool('arrow')" title="Arrow (A)">→</button>
+      <button class="btn" id="btn-erase" onclick="App.setTool('erase')" title="Erase (E)">⌫</button>
+      <div class="hsep"></div>
+      <!-- Path / playback -->
+      <button class="btn" id="btn-pathrec" onclick="App.togglePathRec()" title="Record movement path (P)">🎬</button>
+      <button class="btn" onclick="App.playPaths()" title="Replay paths (Space)">▶</button>
+      <button class="btn red" id="btn-video" onclick="App.toggleVideo()" title="Record video">⏺</button>
+      <div class="hsep"></div>
+      <button class="btn" onclick="App.clearLines()" title="Clear drawings">🗑</button>
+      <button class="btn danger" onclick="App.resetAll()" title="Reset everything">↺</button>
+    </div>
+
+    <div class="header-right">
+      <button class="btn icon-btn" id="btn-menu" onclick="UI.toggleSidebar()" title="Menu">☰</button>
+    </div>
+  </header>
+
+  <!-- REC BADGE -->
+  <div class="recbadge" id="recbadge"><span class="rdot"></span> REC</div>
+
+  <!-- PATH REC BADGE -->
+  <div class="pathbadge" id="pathbadge">🎬 PATH REC</div>
+
+  <!-- MAIN LAYOUT -->
+  <div class="main">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+
+      <!-- TEAMS -->
+      <section class="ss">
+        <div class="sl">Teams</div>
+        <div class="team-row">
+          <div class="team-dot" id="t1dot" style="background:#e74c3c"></div>
+          <input type="text" class="team-name" id="t1name" value="Team A" maxlength="12">
+        </div>
+        <div class="team-row">
+          <div class="team-dot" id="t2dot" style="background:#3498db"></div>
+          <input type="text" class="team-name" id="t2name" value="Team B" maxlength="12">
+        </div>
+        <div class="sl" style="margin-top:8px">Active Team</div>
+        <div class="team-sel">
+          <button id="tsel1" class="on" onclick="App.selectTeam(1)">A</button>
+          <button id="tsel2" onclick="App.selectTeam(2)">B</button>
+        </div>
+      </section>
+
+      <!-- TEAM COLORS -->
+      <section class="ss">
+        <div class="sl">Team Colors</div>
+        <div class="color-label">TEAM A</div>
+        <div class="cgrid" id="cgrid1"></div>
+        <div class="color-label">TEAM B</div>
+        <div class="cgrid" id="cgrid2"></div>
+      </section>
+
+      <!-- ADD -->
+      <section class="ss">
+        <div class="sl">Add to Field</div>
+        <div class="add-row">
+          <input id="pnum" type="text" class="ni" placeholder="#" maxlength="2">
+          <button class="tb on" id="btn-addplayer" onclick="App.setAddMode('player')">+ Player</button>
+        </div>
+        <button class="tb" onclick="App.setAddMode('ball')">🥍 Place Ball</button>
+      </section>
+
+      <!-- SELECTED -->
+      <section class="ss">
+        <div class="sl">Selected Player</div>
+        <button class="tb" onclick="App.toggleBall()">🎯 Toggle Ball Holder</button>
+        <button class="tb" onclick="App.clearSelPath()">🧹 Clear Path</button>
+        <button class="tb" onclick="App.deleteSel()">🗑 Delete</button>
+      </section>
+
+      <!-- PLAYERS LIST -->
+      <section class="ss">
+        <div class="sl">Players (<span id="pcnt">0</span>)</div>
+        <div class="plist" id="plist"></div>
+      </section>
+
+      <!-- PATHS -->
+      <section class="ss">
+        <div class="sl">Paths</div>
+        <button class="tb" onclick="App.playPaths()">▶ Replay All Paths</button>
+        <button class="tb" onclick="App.clearAllPaths()">🗑 Clear All Paths</button>
+      </section>
+
+      <!-- SHORTCUTS (desktop only) -->
+      <section class="ss shortcuts">
+        <div class="sl">Shortcuts</div>
+        <div class="shortcut-grid">
+          <span class="key">D</span><span>Draw</span>
+          <span class="key">A</span><span>Arrow</span>
+          <span class="key">E</span><span>Erase</span>
+          <span class="key">B</span><span>Ball</span>
+          <span class="key">P</span><span>Path Rec</span>
+          <span class="key">Space</span><span>Replay</span>
+          <span class="key">1/2</span><span>Team</span>
+          <span class="key">Del</span><span>Delete</span>
+        </div>
+      </section>
+
+    </aside>
+
+    <!-- CANVAS WRAP -->
+    <div class="cwrap" id="cwrap">
+      <canvas id="c"></canvas>
+      <div class="tip" id="tip">Click field to place player · Drag to move</div>
+    </div>
+
+  </div>
+
+  <script src="field.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
